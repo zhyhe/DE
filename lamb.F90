@@ -242,7 +242,7 @@ contains
                 real(8) :: A_(20)
                 type(source) :: S
                 integer      :: i,j,k,l
-                integer,parameter :: n=1000
+                integer,parameter :: n=1
                 real(8),parameter :: m1=1.4_8,m2=1.4_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,z,ilamb(dimen,dimen)
                 real(8) :: l6(6,6),il6(6,6)
@@ -259,48 +259,35 @@ contains
                 S.cos_iota=0.948_8
                 !S.cos_iota=cos(pi/20)
                 A_=0.
-                do i=1,20
+                do i=10,10
                         z=i*1D-1
                         print'(A2,F3.1)','z=',z
                         S.d_L=dL(z)
                         !S.d_L=500.
                         S.M_c=(1+z)*M_c
                         do j=1,n
-                                !print *,j
-                                !S.theta=0.0
-                                !S.theta=random(-Pi/2,PI/2)
-                                !S.phi=0.0
-                                !S.phi=random(0._8,2*PI)
-                                call rand(S.theta,S.phi,S.psi)
-                                !S.psi=1.
-                                !S.psi=random(0._8,2*pi)
-                                !print *,'rho=',rho(S)
-                                !open(unit=15,file='~/workspace/NR/waveform/H.txt')
-                                !do k=200,10000
-                                !        write(15,*),abs(H_(k*1D-1,S,1))
-                                !enddo
-                                !close(15)
-                                !open(unit=16,file='~/workspace/NR/waveform/hf_real.txt')
-                                !do k=200,10000
-                                !        write(16,*),real(H_(k*1D-1,S,1))
-                                !enddo
-                                !close(16)
-                                !print *,H_(3._8,S,1)/Sqrt(S_h(3._8))
-                                !do k=1,7
-                                !        print *,D_H(3._8,S,1,k)/Sqrt(S_h(3._8))
-                                !enddo
-                                !print*,H_(50._8,S,1)
-                                !print*,M*(1+z),S.eta
+                                S.theta=0.0
+                                S.phi=0.0
+                                !call rand(S.theta,S.phi,S.psi)
+                                S.psi=1.
+                                open(unit=15,file='~/workspace/NR/waveform/H.txt')
+                                do k=200,10000
+                                        write(15,*),abs(H_(k*1D-1,S,1))
+                                enddo
+                                close(15)
+                                open(unit=16,file='~/workspace/NR/waveform/hf_real.txt')
+                                do k=200,10000
+                                        write(16,*),real(H_(k*1D-1,S,1))
+                                enddo
+                                close(16)
 
                                 lamda=lambda(S)
                                 l6=del(lamda,7,5,5)
                                 il6=inverse(l6,6)
-                                !print '(7D25.15)',lamda
-                                !ilamb=inverse(lamda,dimen)
-                                !print*,sqrt(ilamb(7,7))
-                                !print *,' '
-                                !print '(7E25.15)',ilamb
-                                !print *,' '
+                                print '(6D25.15)',l6
+                                print *,' '
+                                print '(6E25.15)',il6
+                                print *,' '
                                 A_(i)=A_(i)+1/(il6(6,6)+0.0025*z**2)
                         enddo
                         A_(i)=1/sqrt(A_(i)/n)
