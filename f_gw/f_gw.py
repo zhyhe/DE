@@ -18,11 +18,17 @@ x=np.linspace(1,20,length)
 x=x/10
 popt,pcov=curve_fit(func,x,y)
 a,b,c=popt[0],popt[1],popt[2]
+
 print(a,b,c)
+
 def A_12(z):
     return a*z+b*z**2+c*z**3
-plot1=plt.plot(x,y,'*',label='original values')
-plot2=plt.plot(x,A_12(x),'r',label='curve_fit')
 
+plt.plot(x,y,'o',color='red',label='Monte Carlo sampling results')
+
+plt.plot(x,A_12(x),'g',label='fit results')
+plt.xlabel("z")
+plt.xticks([0,0.4,0.8,1.2,1.6,2.0])
 plt.title('A^(-1/2)')
+plt.legend()
 plt.show()
