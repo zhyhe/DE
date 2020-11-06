@@ -5,7 +5,7 @@ import copy
 from astropy.cosmology import Planck15, z_at_value
 import astropy.units as u
 from matplotlib import pyplot as plt
-z=0.1
+z=1.0
 d_L = Planck15.luminosity_distance(z)
 print(d_L)
 d_L = d_L.value
