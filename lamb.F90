@@ -270,12 +270,12 @@ contains
                                 S.phi=0.0
                                 !call rand(S.theta,S.phi,S.psi)
                                 S.psi=1.
-                                open(unit=15,file='~/workspace/NR/waveform/H.txt')
+                                open(unit=15,file='~/workspace/DE/NR/waveform/H.txt')
                                 do k=200,10000
                                         write(15,*),abs(H_(k*1D-1,S,1))
                                 enddo
                                 close(15)
-                                open(unit=16,file='~/workspace/NR/waveform/hf_real.txt')
+                                open(unit=16,file='~/workspace/DE/NR/waveform/hf_real.txt')
                                 do k=200,10000
                                         write(16,*),real(H_(k*1D-1,S,1))
                                 enddo
