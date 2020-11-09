@@ -65,6 +65,21 @@ module fiducial
                         call random_number(psi)
                         psi=2*pi*psi
                 end subroutine rand
+                subroutine rand20(theta)
+                        implicit none
+                        real(8) :: x,y,z,r
+                        real(8) :: theta
+                        20 call random_seed()
+                        call random_number(x)
+                        call random_number(y)
+                        call random_number(z)
+                        x=x-5D-1
+                        y=y-5D-1
+                        z=z-5D-1
+                        r=sqrt(x**2+y**2+z**2)
+                        if(r .gt. 5D-1 .or. r .le. 1D-1 .or. z .lt. cos(pi/9)) goto 20
+                        theta=pi/2-asin(z/r)
+                end subroutine rand20
 
                 
 end module fiducial

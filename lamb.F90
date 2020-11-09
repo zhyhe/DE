@@ -256,7 +256,7 @@ contains
                 !S.t0=37524.7561046854_8
                 S.t0=0.
                 S.PHI0=pi/4
-                S.cos_iota=0.948_8
+                !S.cos_iota=0.948_8
                 !S.cos_iota=cos(pi/20)
                 A_=0.
                 do i=1,20
@@ -272,6 +272,8 @@ contains
                                 !S.phi=0.0
                                 !S.phi=random(0._8,2*PI)
                                 call rand(S.theta,S.phi,S.psi)
+                                call rand20(S.cos_iota)
+                                S.cos_iota=cos(S.cos_iota)
                                 !S.psi=1.
                                 !S.psi=random(0._8,2*pi)
                                 !print *,'rho=',rho(S)
