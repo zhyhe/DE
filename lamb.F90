@@ -246,7 +246,7 @@ contains
                 real(8),parameter :: m1=1.4_8,m2=1.4_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,z,ilamb(dimen,dimen)
                 real(8) :: l6(6,6),il6(6,6)
-                real(8) :: x
+                real(8) :: x,iota
 
 
                 M=m1+m2
@@ -273,7 +273,6 @@ contains
                                 !S.phi=random(0._8,2*PI)
                                 call rand(S.theta,S.phi,S.psi)
                                 call rand20(S.cos_iota)
-                                S.cos_iota=cos(S.cos_iota)
                                 !S.psi=1.
                                 !S.psi=random(0._8,2*pi)
                                 !print *,'rho=',rho(S)
