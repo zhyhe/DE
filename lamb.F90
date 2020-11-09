@@ -246,7 +246,7 @@ contains
                 real(8),parameter :: m1=1.4_8,m2=1.4_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,z,ilamb(dimen,dimen)
                 real(8) :: l6(6,6),il6(6,6)
-                real(8) :: x
+                real(8) :: x, iota
 
 
                 M=m1+m2
@@ -256,7 +256,7 @@ contains
                 !S.t0=37524.7561046854_8
                 S.t0=0.
                 S.PHI0=pi/4
-                S.cos_iota=0.948_8
+                call rand20(S.cos_iota)
                 !S.cos_iota=cos(pi/20)
                 A_=0.
                 do i=10,10
@@ -266,10 +266,11 @@ contains
                         !S.d_L=500.
                         S.M_c=(1+z)*M_c
                         do j=1,n
-                                S.theta=0.0
-                                S.phi=0.0
-                                !call rand(S.theta,S.phi,S.psi)
-                                S.psi=1.
+                                !S.theta=0.0
+                                !S.phi=0.0
+                                call rand(S.theta,S.phi,S.psi)
+                                !S.psi=1.
+                                print*,S
                                 open(unit=15,file='~/workspace/DE/NR/waveform/H.txt')
                                 do k=200,10000
                                         write(15,*),abs(H_(k*1D-1,S,1))
