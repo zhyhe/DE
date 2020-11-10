@@ -14,8 +14,16 @@ Program DE
         real(8) :: Fis_U(5,5),Fis_N(5,5),iFis(5,5)
         real(8) :: fis4(4,4),fis3(3,3),ifis3(3,3),fis2(2,2),ifis2(2,2)
         real(8) :: z_p,dw_p
+        real(8) :: theta,phi
 
         P0=para(w0,wa,Omega_m,Omega_k,h0)
         A=A_()
+        open(unit=13,file='test1/test.txt')
+        do i=1,100
+        call rand(theta,phi,20._8)
+        write(13,'(3E25.18)'),theta,phi
+        enddo
+        close(13)
+
 
 end

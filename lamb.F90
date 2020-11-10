@@ -264,6 +264,7 @@ contains
                                 call rand(S.theta,S.phi,180._8)
                                 call rand(iota,S.psi,20._8)
                                 S.cos_iota=cos(iota)
+                                print*,iota
                                 print*,S
 
                                 lamda=lambda(S)
