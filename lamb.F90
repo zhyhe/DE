@@ -271,8 +271,9 @@ contains
                                 !S.theta=random(-Pi/2,PI/2)
                                 !S.phi=0.0
                                 !S.phi=random(0._8,2*PI)
-                                call rand(S.theta,S.phi,S.psi)
-                                call rand20(S.cos_iota)
+                                call rand(S.theta,S.phi,180._8)
+                                call rand(iota,S.psi,20._8)
+                                S.cos_iota=cos(iota)
                                 !S.psi=1.
                                 !S.psi=random(0._8,2*pi)
                                 !print *,'rho=',rho(S)
