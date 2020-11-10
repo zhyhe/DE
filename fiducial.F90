@@ -41,46 +41,26 @@ module fiducial
                         real(8),intent(in) :: lbound,ubound
                         real(8)            :: len,t
                         len=ubound-lbound
-                        call random_seed()
                         call random_number(t)
                         random=lbound+len*t
                 end function random
 
-                subroutine rand(theta,phi,psi)
+                subroutine rand(theta,phi,angle_lim) !产生球面上的随机数,angle_lim表示theta的最大可取值
                         implicit none
                         real(8) :: x,y,z,r
-                        real(8) :: theta,phi,psi
-                        10 call random_seed()
-                        call random_number(x)
+                        real(8) :: theta,phi,angle_lim
+                        10 call random_number(x)
                         call random_number(y)
                         call random_number(z)
                         x=x-5D-1
                         y=y-5D-1
                         z=z-5D-1
                         r=sqrt(x**2+y**2+z**2)
-                        if(r .gt. 5D-1 .or. r .le. 1D-1) goto 10
-                        theta=asin(z/r)+pi/2
+                        if(r .gt. 5D-1 .or. r .le. 1D-1 .or. z .le. cos(angle_lim*pi/180)/2) goto 10
+                        theta=-asin(z/r)+pi/2
                         call random_number(phi)
                         phi=2*pi*phi
-                        call random_number(psi)
-                        psi=2*pi*psi
                 end subroutine rand
-                subroutine rand20(cos_theta)
-                        implicit none
-                        real(8) :: x,y,z,r
-                        real(8) :: cos_theta
-                        call random_seed()
-                        20 call random_number(x)
-                        call random_number(y)
-                        call random_number(z)
-                        x=x-5D-1
-                        y=y-5D-1
-                        z=z-5D-1
-                        r=sqrt(x**2+y**2+z**2)
-                        if(r .gt. 5D-1 .or. r .le. 1D-1 .or. z .lt. cos(pi/9)/2) goto 20
-                        cos_theta=z/r
-                end subroutine rand20
-
                 
 end module fiducial
 

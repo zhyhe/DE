@@ -14,7 +14,7 @@ Program DE
         real(8) :: Fis_U(5,5),Fis_N(5,5),iFis(5,5)
         real(8) :: fis4(4,4),fis3(3,3),ifis3(3,3),fis2(2,2),ifis2(2,2)
         real(8) :: z_p,dw_p
-
+        call random_seed()
         P0=para(w0,wa,Omega_m,Omega_k,h0)
         A=A_()
         open(unit=13,file='A.txt')
