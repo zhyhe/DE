@@ -13,7 +13,7 @@ Program DE
         real(8) :: x(20),A(20),Rot(3)
         real(8) :: Fis_U(5,5),Fis_N(5,5),iFis(5,5)
         real(8) :: fis4(4,4),fis3(3,3),ifis3(3,3),fis2(2,2),ifis2(2,2)
-        real(8) :: z_p,dw_p
+        real(8) :: z_p,dw_p,rho2
         call random_seed()
         P0=para(w0,wa,Omega_m,Omega_k,h0)
         A=A_()
@@ -88,16 +88,18 @@ Program DE
         !print "(2F25.16)",ifis2
         !print *,' '
         print "(2F12.4)",sqrt(iFis2(1,1)),sqrt(iFis2(2,2))
-        !z_p=-1/(1+sqrt(iFis2(2,2))/(iFis2(1,2)*sqrt(iFis2(1,1))))
-        !dw_p=sqrt(iFis2(1,1)*(1-iFis2(1,2)**2))
-        !print*,'z_p & dw_p'
-        !print "(2F12.4)",z_p,dw_p
+        z_p=-1/(1+iFis2(2,2)/iFis2(1,2))
+        rho2=iFis(1,2)**2/(iFis(1,1)*iFis(2,2))
+        dw_p=sqrt(iFis2(1,1)*(1-rho2))
+        print *,' '
+        print*,'z_p & dw_p'
+        print "(2F12.4)",z_p,dw_p
         !print *,Kappa(z)
         fis4=del(Fis_U,5,1,1)
         fis3=del(fis4,4,1,1)
         ifis3=inverse(fis3,3)
         print *,' '
-        print*,'Uniform Distribution of Omega_m, Omega_k & h0'
+        print*,'Omega_m, Omega_k & h0'
         !print "(3E25.16)",fis3
         !print *,' '
         !print "(3F25.16)",ifis3
@@ -115,9 +117,11 @@ Program DE
         !print "(2F25.16)",ifis2
         !print *,' '
         print "(2F12.4)",sqrt(iFis2(1,1)),sqrt(iFis2(2,2))        
-        !z_p=-1/(1+sqrt(iFis2(2,2))/(iFis2(1,2)*sqrt(iFis2(1,1))))
-        !dw_p=sqrt(iFis2(1,1)*(1-iFis2(1,2)**2))
-        !print*,'z_p & dw_p'
-        !!print "(2F12.4)",z_p,dw_p
+        z_p=-1/(1+iFis2(2,2)/iFis2(1,2))
+        rho2=iFis(1,2)**2/(iFis(1,1)*iFis(2,2))
+        dw_p=sqrt(iFis2(1,1)*(1-rho2))
+        print *,' '
+        print*,'z_p & dw_p'
+        print "(2F12.4)",z_p,dw_p
 
 end

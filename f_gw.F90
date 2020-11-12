@@ -38,7 +38,7 @@ contains
                 real(8),intent(in) :: z
                 integer            :: i
                 real(8)            :: Rot(3)
-                open(unit=10,file='A.txt')
+                open(unit=10,file='coe.txt')
                 do i=1,3
                         read(10,*) Rot(i)
                 enddo
