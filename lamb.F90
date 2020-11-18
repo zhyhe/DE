@@ -2,7 +2,7 @@ module Lamb
         use fiducial
         use typedef
         implicit none
-        integer,parameter :: dimen=7
+        integer,parameter :: dimen=6
 
         !$$$$$$$$$$$$$$$     计算Fisher Matrix Lambda     $$$$$$$$$$$$$$$!
 contains
@@ -15,7 +15,7 @@ contains
                         print *,'探测器参数有问题，请检查程序'
                         stop
                 end if
-                F_plus=sqrt(3._8)/2*(0.5*(1+cos(S.theta)**2)*cos(2*(S.phi+2*PI/3*(Det-1)))*cos(2*S.psi)-cos(S.theta)*sin(2*(S.phi+2*PI/3*(Det-1)))*sin(2*S.psi))
+                F_plus=sqrt(3._8)/2*(0.5*(1+cos(S.alpha)**2)*cos(2*(S.delta+2*PI/3*(Det-1)))*cos(2*S.varphi)-cos(S.alpha)*sin(2*(S.delta+2*PI/3*(Det-1)))*sin(2*S.varphi))
         end Function F_plus
         real(8) Function F_cross(S,Det)   !函数,计算Fx,结果是对的
                 implicit none
@@ -25,10 +25,44 @@ contains
                         print *,'探测器参数有问题，请检查程序'
                         stop
                 end if
-                F_cross=sqrt(3._8)/2*(0.5*(1+cos(S.theta)**2)*cos(2*(S.phi+2*PI/3*(Det-1)))*sin(2*S.psi)+cos(S.theta)*sin(2*(S.phi+2*PI/3*(Det-1)))*cos(2*S.psi))
+                F_cross=sqrt(3._8)/2*(0.5*(1+cos(S.alpha)**2)*cos(2*(S.delta+2*PI/3*(Det-1)))*sin(2*S.varphi)+cos(S.alpha)*sin(2*(S.delta+2*PI/3*(Det-1)))*cos(2*S.varphi))
         end Function F_cross
 
-        REAL(8) FUNCTION phi_(cos_iota,F_plus,F_cross) !函数,计算phi20,结果是对的
+        subroutine Pat_Func(S,F1,Fx)
+                implicit none
+                type(source) :: S
+                real(8) :: F1,Fx,at,bt,t
+                real(8) :: Salpha,Svarphi,Sdelta
+                real(8) :: Slambdar,Sgama,Szeta,Spsi
+
+                !       计算变换矩阵
+                Salpha=S.alpha
+                Svarphi=S.varphi
+                Sdelta=S.delta
+                Spsi=ET(1)*deg2nat
+                Slambdar=ET(2)*deg2nat
+                Sgama=ET(3)*deg2nat
+                Szeta=ET(4)*deg2nat
+
+                !       计算文章中的a，b，以及两个响应函数
+                at = 1._8/16*sin(2*Sgama)*(3-cos(2*Spsi))*(3-cos(2*Sdelta))*cos(2*(Salpha-Slambdar-t))
+                at = at-1.0/4.0*cos(2.*Sgama)*sin(Spsi)*(3.-cos(2.*Sdelta))*sin(2.*(Salpha-Slambdar-t))
+                at = at+1.0/4.0*sin(2.*Sgama)*sin(2.*Spsi)*sin(2.*Sdelta)*cos(Salpha-Slambdar-t)
+                at = at-1.0/2.0*cos(2.*Sgama)*cos(Spsi)*sin(2.*Sdelta)*sin(Salpha-Slambdar-t)
+                at = at+3.0/4.0*sin(2.*Sgama)*cos(Spsi)*cos(Spsi)*cos(Sdelta)*cos(Sdelta)
+
+                bt = cos(2*Sgama)*sin(Spsi)*sin(Sdelta)*cos(2.*(Salpha-Slambdar-t))
+                bt = bt+1.0/4.0*sin(2.*Sgama)*(3.-cos(2.*Spsi))*sin(Sdelta)*sin(2.*(Salpha-Slambdar-t))
+                bt = bt+cos(2.*Sgama)*cos(Spsi)*cos(Sdelta)*cos(Salpha-Slambdar-t)
+                bt = bt+1.0/2.0*sin(2.*Sgama)*sin(2.*Spsi)*cos(Sdelta)*sin(Salpha-Slambdar-t)
+
+                F1 = sin(Szeta)*(at*cos(2.0*Svarphi)+bt*sin(2.0*Svarphi))
+                Fx = sin(Szeta)*(bt*cos(2.0*Svarphi)-at*sin(2.0*Svarphi))
+                print*,F1,Fx
+        end subroutine Pat_Func
+
+
+        REAL(8) FUNCTION phi_(cos_iota,F_plus,F_cross) !函数,计算delta20,结果是对的
                 real(8),intent(in) :: cos_iota,F_plus,F_cross
                 phi_=atan(-(2*cos_iota*F_cross)/((1+cos_iota**2)*F_plus))
         END FUNCTION phi_
@@ -37,7 +71,7 @@ contains
                 real(8),intent(in) :: f,eta,M
                 real(8) :: psi(0:7)     !数组元素输入正确
                 real(8) :: piMf
-                real(8) :: lambda,theta
+                real(8) :: lambda,alpha
                 piMf=GM3*M*f
                 psi(0)=1.
                 psi(1)=0.
@@ -69,8 +103,8 @@ contains
                 !NF_cross=-0.740002081832980_8
                 A=(G**(5._8/6)*c0**(-3._8/2)/(S.d_L*pc*1D6))*sqrt(NF_plus**2*(1+S.cos_iota**2)**2+\
                   NF_cross**2*4*S.cos_iota**2)*sqrt(5*PI/96)*PI**(-7._8/6)*(S.M_c*Msun)**(5._8/6)
-                H_=A*f**(-7._8/6)*exp(cj*(2*PI*f*S.t0-PI/4-2*S.PHI0+2*psi_(f/2,S.eta,M)-phi_(S.cos_iota,NF_plus,NF_cross)))
-                !H_=A*f**(-7._8/6)*exp(cj*(2*PI*f*S.t0-PI/4-2*S.PHI0-phi_(S.cos_iota,NF_plus,NF_cross)))
+                H_=A*f**(-7._8/6)*exp(cj*(2*PI*f*S.t_c-PI/4-2*S.psi_c+2*psi_(f/2,S.eta,M)-phi_(S.cos_iota,NF_plus,NF_cross)))
+                !H_=A*f**(-7._8/6)*exp(cj*(2*PI*f*S.t_c-PI/4-2*S.psi_c-phi_(S.cos_iota,NF_plus,NF_cross)))
         END FUNCTION H_
 
         !*******************     计算H(f)的偏导     *******************!
@@ -96,27 +130,22 @@ contains
                         D_H=(H_(f,S2,Det)-H_(f,S1,Det))*S.eta/(2*h)
                 case(3)
                         !h=1D-8
-                        !S1.t0=S.t0-h !t0=0
-                        !S2.t0=S.t0+h
+                        !S1.t_c=S.t_c-h !t_c=0
+                        !S2.t_c=S.t_c+h
                         !D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
                         D_H=2*PI*f*cj*H_(f,S,Det)
                 case(4)
                         !h=1D-15
-                        !S1.PHI0=S.PHI0-h !PHI0=0
-                        !S2.PHI0=S.PHI0+h
+                        !S1.psi_c=S.psi_c-h !psi_c=0
+                        !S2.psi_c=S.psi_c+h
                         !D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
                         D_H=-2*cj*H_(f,S,Det)
                 case(5)
-                        h=1D-1
-                        S1.cos_iota=S.cos_iota-h !cos_iota=1
-                        S2.cos_iota=S.cos_iota+h
+                        h=1D-3
+                        S1.varphi=S.varphi-h 
+                        S2.varphi=S.varphi+h
                         D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
                 case(6)
-                        h=1D-3
-                        S1.psi=S.psi-h 
-                        S2.psi=S.psi+h
-                        D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
-                case(7)
                         !h=1D-4
                         !S1.d_L=S.d_L-h !d_L*=1000
                         !S2.d_L=S.d_L+h
@@ -245,37 +274,36 @@ contains
                 integer,parameter :: n=1
                 real(8),parameter :: m1=1.35_8,m2=1.35_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,z,ilamb(dimen,dimen)
-                real(8) :: l6(6,6),il6(6,6)
                 real(8) :: x,iota
 
 
                 M=m1+m2
                 S.eta=0.25_8
                 M_c=M*S.eta**6D-1
-                S.t0=0.
-                S.PHI0=pi/4
+                S.t_c=0.
+                S.psi_c=pi/4
                 A_=0.
                 open(unit=10,file='~/workspace/DE/New_SNRall_ET2CE7200000_1to1.dat')
                 read (10,*)
                 read (10,*)
 
                 do i=1,3
-                        read(10,*) x,S.z,S.d_L,S.theta,S.phi,S.psi,iota
-                        S.theta=deg2nat*S.theta
-                        S.phi=deg2nat*S.phi
-                        S.psi=deg2nat*S.psi
+                        read(10,*) x,S.z,S.d_L,S.alpha,S.delta,S.varphi,iota
+                        S.alpha=deg2nat*S.alpha
+                        S.delta=deg2nat*S.delta
+                        S.varphi=deg2nat*S.varphi
                         S.cos_iota=cos(deg2nat*iota)
                         S.d_L=1000*S.d_L
                         S.M_c=(1+S.z)*M_c
                         print*,S
 
                                 !print *,j
-                                !S.theta=0.0
-                                !S.theta=random(-Pi/2,PI/2)
-                                !S.phi=0.0
-                                !S.phi=random(0._8,2*PI)
-                                !S.psi=1.
-                                !S.psi=random(0._8,2*pi)
+                                !S.alpha=0.0
+                                !S.alpha=random(-Pi/2,PI/2)
+                                !S.delta=0.0
+                                !S.delta=random(0._8,2*PI)
+                                !S.varphi=1.
+                                !S.varphi=random(0._8,2*pi)
                                 !print *,'rho=',rho(S)
                                 !open(unit=15,file='~/workspace/NR/waveform/H.txt')
                                 !do k=200,10000
@@ -295,15 +323,14 @@ contains
                                 !print*,M*(1+z),S.eta
 
                                 lamda=lambda(S)
-                                l6=del(lamda,7,5,5)
-                                il6=inverse(l6,6)
+                                ilamb=inverse(lamda,6)
                                 !print '(6D25.15)',l6
                                 !ilamb=inverse(lamda,dimen)
                                 !print*,sqrt(ilamb(7,7))
                                 !print *,' '
                                 !print '(7E25.15)',ilamb
                                 !print *,' '
-                                A_(i)=sqrt(il6(6,6)+0.0025*z**2)
+                                A_(i)=sqrt(ilamb(6,6)+0.0025*z**2)
                         print'(A12,F15.7)','delta(lndL)=',A_(i)
                 enddo
         end function A_
