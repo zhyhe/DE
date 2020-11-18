@@ -2,80 +2,8 @@ module F_GW
         use fiducial
         use typedef
         implicit none
-        private A_12,r2,Hub,F_dC,simp,d_C,Fish_simp
+        private Hub,F_dC,simp,d_C
 contains
-        !********    fit of ax+bx^2+cx^3    ********!
-        subroutine fit_poly3(X,Y,m,Rot)
-                implicit none
-                integer,intent(in) :: m
-                real(8),intent(in) :: X(m),Y(m)
-                integer            :: i,j,k
-                real(8)            :: coe(3,3),re(3),Rot(3) !存放系数矩阵与值
-                coe=0.
-                re=0.
-                do i=1,3
-                  do j=1,i
-                    do k=1,m
-                     coe(i,j)=coe(i,j)+X(k)**(i+j)
-                    enddo
-                  enddo
-                enddo
-                do i=1,3
-                  do j=i+1,3
-                    coe(i,j)=coe(j,i) 
-                  enddo
-                enddo
-                do i=1,3
-                  do k=1,m
-                    re(i)=re(i)+Y(k)*X(k)**i
-                  enddo
-                enddo
-                Rot=Root(coe,re,3)
-        end subroutine fit_poly3
-
-        real(8) function A_12(z) !函数A^(-1/2)
-                implicit none
-                real(8),intent(in) :: z
-                integer            :: i
-                real(8)            :: Rot(3)
-                open(unit=10,file='coe.txt')
-                do i=1,3
-                        read(10,*) Rot(i)
-                enddo
-                close(10)
-                !A_12=0.1449_8*z-0.0118_8*z**2+0.0012_8*z**3
-                A_12=Rot(1)*z+Rot(2)*z**2+Rot(3)*z**3
-        end function A_12
-
-        !********    evolution of the source rate    ********!
-        real(8) function r2(z)
-                implicit none
-                real(8),intent(in) :: z
-                if(z<=1.)then
-                        r2=1+2*z
-                elseif(z<5)then
-                        r2=(15-3*z)/4
-                else
-                        r2=0.
-                endif
-        endfunction r2
-
-        !*************    number distribution    ************!
-        real(8) function f(k,z)
-                implicit none
-                real(8),intent(in) :: z
-                integer,intent(in) :: k
-                select case(k)
-                case(1)  !uniform distribution
-                        f=1.089826289902180D-3*4*PI*(dC(z))**2/((1+z)*H(z))
-                case(2)  !nonuniform distribution
-                        f=4.298333357962829D-4*r2(z)*4*PI*(dC(z))**2/((1+z)*H(z))
-                case default
-                        print *,'ERROR'
-                        stop
-                endselect
-        end function f
-
         !******************    光度距离    ******************!
         real(8) function Hub(z,P) !Hubble parameter
                 implicit none
@@ -188,38 +116,21 @@ contains
         end function dd_L
 
         !**********        Fisher Matrix        **********!
-        real(8) function Fish_simp(P,a,b,width,i,j,k) !为下面的Fisher函数作准备
+        function Fisher(P)  !返回Fisher Matrix F_GW
                 implicit none
-                real(8),intent(in)    :: a,b,width
-                type(para),intent(in) :: P
-                integer,intent(in)    :: i,j,k !分别是i,j导数及fk
-                integer               :: l,n
-                real(8)               :: width_,x
-                n=(b-a)/width
-                if(mod(n,2)==0) n=n+1
-                width_=(b-a)/(n-1)
-                Fish_simp=dd_L(a,P,i)*dd_L(a,P,j)*f(k,a)/(A_12(a))**2+dd_L(b,P,i)*dd_L(b,P,j)*f(k,b)/(A_12(b))**2
-                do l=2,n-1
-                x=a+(l-1)*width_
-                if(mod(l,2)==0)then
-                        Fish_simp=Fish_simp+4*dd_L(x,P,i)*dd_L(x,P,j)*f(k,x)/(A_12(x))**2
-                else
-                        Fish_simp=Fish_simp+2*dd_L(x,P,i)*dd_L(x,P,j)*f(k,x)/(A_12(x))**2
-                end if
-                enddo
-                Fish_simp=Fish_simp*width_/3
-        end function Fish_simp
-
-        function Fisher(P,k)  !返回Fisher Matrix F_GW
                 type(para),intent(in) :: P
                 real(8) :: Fisher(5,5)
-                integer,intent(in) :: k
-                integer :: i,j
-                real(8) :: dz=1D-2
+                real(8) :: z,e
+                integer :: i,j,ioS
+                open(unit=30,file='A.txt')
+                do
+                read(30,*,ioStat=ioS) z,e
+                if(ioS/=0) exit
                 do j=1,5
                         do i=1,5
-                                Fisher(i,j)=Fish_simp(P,1D-2,2._8,dz,i,j,k)
+                                Fisher(i,j)=Fisher(i,j)+dd_L(z,P,i)*dd_L(z,P,j)/e
                         enddo
+                enddo
                 enddo
         end function Fisher
 
