@@ -242,38 +242,38 @@ contains
                 real(8) :: A_(20)
                 type(source) :: S
                 integer      :: i,j,k,l
-                integer,parameter :: n=1000
-                real(8),parameter :: m1=1.4_8,m2=1.4_8
+                integer,parameter :: n=1
+                real(8),parameter :: m1=1.35_8,m2=1.35_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,z,ilamb(dimen,dimen)
                 real(8) :: l6(6,6),il6(6,6)
                 real(8) :: x,iota
 
 
                 M=m1+m2
-                !S.eta=m1*m2/M**2
                 S.eta=0.25_8
                 M_c=M*S.eta**6D-1
-                !S.t0=37524.7561046854_8
                 S.t0=0.
                 S.PHI0=pi/4
-                !S.cos_iota=0.948_8
-                !S.cos_iota=cos(pi/20)
                 A_=0.
-                do i=1,20
-                        z=i*1D-1
-                        print'(A2,F3.1)','z=',z
-                        S.d_L=dL(z)
-                        !S.d_L=500.
-                        S.M_c=(1+z)*M_c
-                        do j=1,n
+                open(unit=10,file='~/workspace/DE/New_SNRall_ET2CE7200000_1to1.dat')
+                read (10,*)
+                read (10,*)
+
+                do i=1,3
+                        read(10,*) x,S.z,S.d_L,S.theta,S.phi,S.psi,iota
+                        S.theta=deg2nat*S.theta
+                        S.phi=deg2nat*S.phi
+                        S.psi=deg2nat*S.psi
+                        S.cos_iota=cos(deg2nat*iota)
+                        S.d_L=1000*S.d_L
+                        S.M_c=(1+S.z)*M_c
+                        print*,S
+
                                 !print *,j
                                 !S.theta=0.0
                                 !S.theta=random(-Pi/2,PI/2)
                                 !S.phi=0.0
                                 !S.phi=random(0._8,2*PI)
-                                call rand(S.theta,S.phi,180._8)
-                                call rand(iota,S.psi,20._8)
-                                S.cos_iota=cos(iota)
                                 !S.psi=1.
                                 !S.psi=random(0._8,2*pi)
                                 !print *,'rho=',rho(S)
@@ -297,15 +297,13 @@ contains
                                 lamda=lambda(S)
                                 l6=del(lamda,7,5,5)
                                 il6=inverse(l6,6)
-                                !print '(7D25.15)',lamda
+                                !print '(6D25.15)',l6
                                 !ilamb=inverse(lamda,dimen)
                                 !print*,sqrt(ilamb(7,7))
                                 !print *,' '
                                 !print '(7E25.15)',ilamb
                                 !print *,' '
-                                A_(i)=A_(i)+1/(il6(6,6)+0.0025*z**2)
-                        enddo
-                        A_(i)=1/sqrt(A_(i)/n)
+                                A_(i)=sqrt(il6(6,6)+0.0025*z**2)
                         print'(A12,F15.7)','delta(lndL)=',A_(i)
                 enddo
         end function A_

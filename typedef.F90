@@ -2,7 +2,7 @@ module typedef
         implicit none
         !$$$$$$$$$$     数据类型source,存放源的参数     $$$$$$$$$$!
         type source
-                real(8) :: M_c,eta,t0,PHI0,cos_iota,psi,d_L,theta,phi
+                real(8) :: M_c,eta,t0,PHI0,cos_iota,psi,d_L,theta,phi,z
         end type source
 
         !$$$$$$$$$$     数据类型para,存放宇宙学参数     $$$$$$$$$$!
