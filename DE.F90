@@ -4,25 +4,22 @@ Program DE
         use f_cmb
         implicit none
         integer :: i,j
-        integer,parameter :: n=7
-        real(8) :: z=2D-1
         type(para) :: P,P0
         type(source) :: S,S0
  
-        real(8) :: dee
 
-        real(8) :: x(20),A(20),Rot(3)
         real(8) :: Fis_U(5,5),Fis_N(5,5),iFis(5,5)
         real(8) :: fis4(4,4),fis3(3,3),ifis3(3,3),fis2(2,2),ifis2(2,2)
         real(8) :: z_p,dw_p,rho2
         call random_seed()
 
         P0=para(w0,wa,Omega_m,Omega_k,h0)
-        call Fisher_S()
+        print*,d_L(0.01_8,P0)
+        !call Fisher_S()
         Fis_U=Fisher(P0)
         iFis=inverse(Fis_U,5)
         print *,' '
-        print*,'Uniform Distribution'
+        print*,'Fisher Matrix of sum of sources:'
         print "(5E25.16)",Fis_U
         !print *,' '
         !print "(5F25.16)",iFis
@@ -39,7 +36,12 @@ Program DE
         !print *,' '
         !print "(2F25.16)",ifis2
         !print *,' '
+        !print "(2F12.4)",sqrt(iFis2(1,1)),sqrt(iFis2(2,2))
         print "(2F12.4)",sqrt(iFis2(1,1)),sqrt(iFis2(2,2))
+        print *,' '
+        print *,'FoM'
+        print*,1/sqrt(Det(ifis2,2))
+        print *,' '
         z_p=-1/(1+iFis2(2,2)/iFis2(1,2))
         rho2=iFis(1,2)**2/(iFis(1,1)*iFis(2,2))
         dw_p=sqrt(iFis2(1,1)*(1-rho2))

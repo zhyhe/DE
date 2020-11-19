@@ -11,7 +11,7 @@ contains
                 implicit none
                 type(source) :: S
                 integer,intent(in) :: Det
-                real(8) :: F1,Fx,at,bt,t
+                real(8) :: F1,Fx,at,bt
                 real(8) :: Salpha,Svarphi,Sdelta
                 real(8) :: Slambdar,Sgama,Szeta,Spsi
                 if( Det/=1 .and. Det/=2 .and. Det/=3 ) then
@@ -28,16 +28,16 @@ contains
                 Szeta=ET(4)*deg2nat
 
                 !       计算文章中的a，b，以及两个响应函数
-                at = 1._8/16*sin(2*Sgama)*(3-cos(2*Spsi))*(3-cos(2*Sdelta))*cos(2*(Salpha-Slambdar-t))
-                at = at-1.0/4.0*cos(2.*Sgama)*sin(Spsi)*(3.-cos(2.*Sdelta))*sin(2.*(Salpha-Slambdar-t))
-                at = at+1.0/4.0*sin(2.*Sgama)*sin(2.*Spsi)*sin(2.*Sdelta)*cos(Salpha-Slambdar-t)
-                at = at-1.0/2.0*cos(2.*Sgama)*cos(Spsi)*sin(2.*Sdelta)*sin(Salpha-Slambdar-t)
-                at = at+3.0/4.0*sin(2.*Sgama)*cos(Spsi)*cos(Spsi)*cos(Sdelta)*cos(Sdelta)
+                at = 1./16*sin(2*Sgama)*(3-cos(2*Spsi))*(3-cos(2*Sdelta))*cos(2*(Salpha-Slambdar))
+                at = at-1./4*cos(2*Sgama)*sin(Spsi)*(3-cos(2*Sdelta))*sin(2*(Salpha-Slambdar))
+                at = at+1./4*sin(2*Sgama)*sin(2*Spsi)*sin(2*Sdelta)*cos(Salpha-Slambdar)
+                at = at-1./2*cos(2*Sgama)*cos(Spsi)*sin(2*Sdelta)*sin(Salpha-Slambdar)
+                at = at+3./4*sin(2*Sgama)*cos(Spsi)*cos(Spsi)*cos(Sdelta)*cos(Sdelta)
 
-                bt = cos(2*Sgama)*sin(Spsi)*sin(Sdelta)*cos(2.*(Salpha-Slambdar-t))
-                bt = bt+1.0/4.0*sin(2.*Sgama)*(3.-cos(2.*Spsi))*sin(Sdelta)*sin(2.*(Salpha-Slambdar-t))
-                bt = bt+cos(2.*Sgama)*cos(Spsi)*cos(Sdelta)*cos(Salpha-Slambdar-t)
-                bt = bt+1.0/2.0*sin(2.*Sgama)*sin(2.*Spsi)*cos(Sdelta)*sin(Salpha-Slambdar-t)
+                bt = cos(2*Sgama)*sin(Spsi)*sin(Sdelta)*cos(2*(Salpha-Slambdar))
+                bt = bt+1./4*sin(2*Sgama)*(3-cos(2*Spsi))*sin(Sdelta)*sin(2*(Salpha-Slambdar))
+                bt = bt+cos(2*Sgama)*cos(Spsi)*cos(Sdelta)*cos(Salpha-Slambdar)
+                bt = bt+1./2*sin(2*Sgama)*sin(2*Spsi)*cos(Sdelta)*sin(Salpha-Slambdar)
 
                 F1 = sin(Szeta)*(at*cos(2*Svarphi)+bt*sin(2*Svarphi))
                 Fx = sin(Szeta)*(bt*cos(2*Svarphi)-at*sin(2*Svarphi))
@@ -252,7 +252,7 @@ contains
                 implicit none
                 type(source) :: S
                 integer      :: i,j,k,l
-                integer,parameter :: n=2000
+                integer,parameter :: n=1000
                 real(8) :: A(n)
                 real(8),parameter :: m1=1.35_8,m2=1.35_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,ilamb(dimen,dimen)
@@ -269,7 +269,7 @@ contains
                 do i=1,2
                 read (10,*)
                 enddo
-                open(unit=11,file='A.txt')
+                open(unit=11,file='dd_L.txt')
 
                 do i=1,n
                         read(10,*) x,S.z,S.d_L,S.alpha,S.delta,S.varphi,iota
@@ -290,7 +290,7 @@ contains
                         !print '(6E25.15)',matmul(lamda,ilamb)
                         A(i)=ilamb(6,6)+0.0025*S.z**2
                         !print'(F6.4,F21.15)',S.z,A(i)
-                        write(11,'(F6.4,F25.15)')S.z,A(i)
+                        write(11,'(F6.4,E25.15)')S.z,A(i)
                 enddo
                 close(11)
                 close(10)

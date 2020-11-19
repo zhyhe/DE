@@ -24,6 +24,7 @@ contains
 
        !   特定的simpson积分，专门为了计算上面这个函数的积分   !
         real(8) function simp(P,a,b,width)
+                implicit none
                 real(8),intent(in)    :: a,b,width
                 type(para),intent(in) :: P
                 integer               :: i,n
@@ -79,6 +80,7 @@ contains
                 real(8),intent(in) :: z
                 type(para),intent(in) :: P
                 type(para)         :: P1,P2
+                real(8)            :: z1,z2
                 real(8)            :: h
                 P1=P
                 P2=P
@@ -109,6 +111,11 @@ contains
                         P1.h0=P1.h0-h
                         P2.h0=P2.h0+h
                         dd_L=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
+                case(6)
+                        h=1D-2
+                        z1=z-h
+                        z2=z+h
+                        dd_L=(d_L(z2,P)-d_L(z1,P))/(2*h*d_L(z,p)) !注意，这里没有除以d_L(z,P)
                 case default
                         print *,'dd_L函数整数参数有误'
                         stop
@@ -120,18 +127,36 @@ contains
                 implicit none
                 type(para),intent(in) :: P
                 real(8) :: Fisher(5,5)
-                real(8) :: z,e
-                integer :: i,j,ioS
-                open(unit=30,file='A.txt')
-                do
-                read(30,*,ioStat=ioS) z,e
-                if(ioS/=0) exit
+                real(8) :: a,z,dL,dz,ddL,test(2)
+                integer :: i,j,k,ioS,l,n=10
+                Fisher=0
+                open(unit=30,file='/home/zhyhe/workspace/DE.data/New_SNRall_ET2CE10000.dat')
+                do i=1,2+10001*1
+                        read(30,*)
+                enddo
+                l=0
+                do k=1,n
+                read(30,*) a,z,dL,dz,ddL
+        if (a>10) then
+                        !print*,dz/ddL,(dz*dd_L(z,P,6))!,dL,d_L(z,P)
+                        !test=test+1/(ddL**2+(dz*dd_L(z,P,6))**2)
+                        !test(1)=test(1)+1/(ddL**2)
+                        !test(2)=test(2)+1/(ddL**2+(dz*dd_L(z,P,6))**2)
+
+                l=l+1
                 do j=1,5
                         do i=1,5
-                                Fisher(i,j)=Fisher(i,j)+dd_L(z,P,i)*dd_L(z,P,j)/e
+                                Fisher(i,j)=Fisher(i,j)+dd_L(z,P,i)*dd_L(z,P,j)/(ddL**2)
+                                !Fisher(i,j)=Fisher(i,j)+18*dd_L(z,P,i)*dd_L(z,P,j)/(ddL**2+(dz*dd_L(z,P,6))**2)
                         enddo
                 enddo
+        endif
                 enddo
+        
+        print*,l
+                Fisher=210000*Fisher/n
+        !print*,'*************',test(1)/test(2)
+                close(30)
         end function Fisher
 
 end module F_GW
