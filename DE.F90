@@ -15,7 +15,7 @@ Program DE
 
         P0=para(w0,wa,Omega_m,Omega_k,h0)
         print*,d_L(0.01_8,P0)
-        !call Fisher_S()
+        call Fisher_S()
         Fis_U=Fisher(P0)
         iFis=inverse(Fis_U,5)
         print *,' '
