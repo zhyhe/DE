@@ -128,7 +128,7 @@ contains
                 type(para),intent(in) :: P
                 real(8) :: Fisher(5,5)
                 real(8) :: a,z,dL,dz,ddL,test(2)
-                integer :: i,j,k,ioS,l,n=10
+                integer :: i,j,k,ioS,l,n=100
                 Fisher=0
                 open(unit=30,file='/home/zhyhe/workspace/DE.data/New_SNRall_ET2CE10000.dat')
                 do i=1,2+10001*1

@@ -34,7 +34,6 @@ contains
                 if(n<2)then
                         print *,'ERROR'
                 endif
-
                 if(row==1)then
                         C=A(2:n,:)
                 elseif(row<n)then
@@ -52,6 +51,13 @@ contains
                         B=C(:,1:n-1)
                 endif
         end function del
+        function dob(A,n,l) result(B)
+                implicit none
+                integer,intent(in) :: n,l
+                real(8),intent(in) :: A(n,n)
+                real(8)            :: B(n-1,n-1)
+                B=del(A,n,l,l)
+        end function dob
 
         !**********    n阶矩阵A的逆矩阵    **********!
         function inv(A,n)
@@ -61,7 +67,6 @@ contains
                 real(8) :: inv(n,n),b(n-1,n-1)
                 real(8) :: De
                 De=det(A,n)
-                print *,'de=====',De
                 do i=1,n
                         do j=1,n
                                 b=del(A,n,i,j)

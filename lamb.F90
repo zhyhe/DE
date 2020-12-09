@@ -266,12 +266,12 @@ contains
                 S.psi_c=pi/4
                 A=0.
                 open(unit=10,file='~/workspace/DE.data/New_SNRall_ET2CE7200000_1to1.dat')
-                do i=1,2+2
+                do i=1,2
                 read (10,*)
                 enddo
                 open(unit=11,file='dd_L.txt')
 
-                do i=1,1
+                do i=1,20
                         read(10,*) x,S.z,S.d_L,S.alpha,S.delta,S.varphi,iota
                         !print*,S
                         !print*,iota
@@ -285,11 +285,11 @@ contains
                         lamda=lambda(S)
                         ilamb=inverse(lamda,6)
                         !ilamb=inverse(lamda,dimen)
-                        print '(6E25.15)',lamda
+                        !print '(6E25.15)',lamda
                         !print *,' '
                         !print '(6E25.15)',matmul(lamda,ilamb)
-                        A(i)=ilamb(6,6)+0.0025*S.z**2
-                        print'(F6.4,F21.15)',S.z,A(i)
+                        A(i)=ilamb(6,6)!+0.0025*S.z**2
+                        print'(F6.4,F21.15)',S.z,sqrt(A(i))
                         !write(11,'(F6.4,E25.15)')S.z,A(i)
                 enddo
                 close(11)
