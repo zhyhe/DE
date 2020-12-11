@@ -2,7 +2,7 @@ module F_GW
         use fiducial
         use typedef
         implicit none
-        private Hub,F_dC,simp,d_C
+        !private Hub,F_dC,simp,d_C
 contains
         !******************    光度距离    ******************!
         real(8) function Hub(z,P) !Hubble parameter
@@ -12,7 +12,7 @@ contains
                 real(8)            :: E,Om_de
                 E=(1+z)**(3*(1+P.w0+P.wa))*Exp(-3*P.wa*z/(1+z))
                 Om_de=1-P.Omega_m-P.Omega_k
-                Hub=P.h0*100*(P.Omega_m*(1+z)**3+P.Omega_k*(1+z)**2+Om_de*E)**0.5!km/s/Mpc
+                Hub=P.h0*1D2*(P.Omega_m*(1+z)**3+P.Omega_k*(1+z)**2+Om_de*E)**0.5!km/s/Mpc
         end function Hub
 
         real(8) function F_dC(z,P) !共动距离的积分量
@@ -51,7 +51,7 @@ contains
                 implicit none
                 real(8),intent(in) :: z
                 type(para)         :: P
-                real(8)            :: dz=1D-3
+                real(8)            :: dz=1D-2
                 d_C=simp(P,0._8,z,dz)
         end function d_C
 
@@ -74,90 +74,95 @@ contains
 
 
         !***********    光度距离d_L的偏微分dd_L    ***********!
-        real(8) function dd_L(z,P,j)
+        function dd_L(z,P)
                 implicit none
-                integer,intent(in) :: j
-                real(8),intent(in) :: z
+                real(8),intent(in)    :: z
                 type(para),intent(in) :: P
-                type(para)         :: P1,P2
-                real(8)            :: z1,z2
-                real(8)            :: h
+                type(para) P1,P2
+                real(8) :: h
+                real(8) :: dd_L(6)
+                
+                h=1D-7
                 P1=P
                 P2=P
-
-                select case(j)
-                case(1)
-                        h=1D-3
-                        P1.w0=P1.w0-h
-                        P2.w0=P2.w0+h
-                        dd_L=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
-                case(2)
-                        h=1D-2
-                        P1.wa=P1.wa-h
-                        P2.wa=P2.wa+h
-                        dd_L=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
-                case(3)
-                        h=1D-3
-                        P1.Omega_m=P1.Omega_m-h
-                        P2.Omega_m=P2.Omega_m+h
-                        dd_L=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
-                case(4)
-                        h=1D-3
-                        P1.Omega_k=P1.Omega_k-h
-                        P2.Omega_k=P2.Omega_k+h
-                        dd_L=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
-                case(5)
-                        h=1D-4
-                        P1.h0=P1.h0-h
-                        P2.h0=P2.h0+h
-                        dd_L=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
-                case(6)
-                        h=1D-2
-                        z1=z-h
-                        z2=z+h
-                        dd_L=(d_L(z2,P)-d_L(z1,P))/(2*h*d_L(z,p)) !注意，这里没有除以d_L(z,P)
-                case default
-                        print *,'dd_L函数整数参数有误'
-                        stop
-                endselect
+                P1.w0=P1.w0-h
+                P2.w0=P2.w0+h
+                dd_L(1)=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
+                
+                h=1D-7
+                P1=P
+                P2=P
+                P1.wa=P1.wa-h
+                P2.wa=P2.wa+h
+                dd_L(2)=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
+                
+                h=1D-3
+                P1=P
+                P2=P
+                P1.Omega_m=P1.Omega_m-h
+                P2.Omega_m=P2.Omega_m+h
+                dd_L(3)=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
+                
+                h=1D-3
+                P1=P
+                P2=P
+                P1.Omega_k=P1.Omega_k-h
+                P2.Omega_k=P2.Omega_k+h
+                dd_L(4)=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
+                
+                h=1D-4
+                P1=P
+                P2=P
+                P1.h0=P1.h0-h
+                P2.h0=P2.h0+h
+                dd_L(5)=(d_L(z,P2)-d_L(z,P1))/(2*h*d_L(z,P))
+                
+                h=1D-7
+                dd_L(6)=(d_L(z+h,P)-d_L(z-h,P))/(2*h*d_L(z,P))
         end function dd_L
 
         !**********        Fisher Matrix        **********!
-        function Fisher(P)  !返回Fisher Matrix F_GW
+        subroutine Fisher(P)
                 implicit none
+                integer,parameter :: m=5
                 type(para),intent(in) :: P
-                real(8) :: Fisher(5,5)
-                real(8) :: a,z,dL,dz,ddL,test(2)
-                integer :: i,j,k,ioS,l,n=100
-                Fisher=0
+                real(8) :: Fish(m,m),iFish(m,m)
+                real(8) :: fis(2,2),ifis(2,2)
+                real(8) :: dLs(6)
+                real(8) :: B,C
+                real(8) :: a,z,dL,dz,ddL
+                integer :: i,j,k,l,n=10000
+                Fish=0
                 open(unit=30,file='/home/zhyhe/workspace/DE.data/New_SNRall_ET2CE10000.dat')
-                do i=1,2+10001*1
-                        read(30,*)
-                enddo
-                l=0
-                do k=1,n
-                read(30,*) a,z,dL,dz,ddL
-        if (a>10) then
-                        !print*,dz/ddL,(dz*dd_L(z,P,6))!,dL,d_L(z,P)
-                        !test=test+1/(ddL**2+(dz*dd_L(z,P,6))**2)
-                        !test(1)=test(1)+1/(ddL**2)
-                        !test(2)=test(2)+1/(ddL**2+(dz*dd_L(z,P,6))**2)
+                read(30,*)
+                do l=1,19
 
-                l=l+1
-                do j=1,5
-                        do i=1,5
-                                Fisher(i,j)=Fisher(i,j)+dd_L(z,P,i)*dd_L(z,P,j)/(ddL**2)
-                                !Fisher(i,j)=Fisher(i,j)+18*dd_L(z,P,i)*dd_L(z,P,j)/(ddL**2+(dz*dd_L(z,P,6))**2)
+                read(30,*) B,C
+                Fish=0
+
+                do k=1,n
+                read(30,*) a,z,dL,ddL,dz
+        !if (a>10) then
+                dLs=dd_L(z,P)
+                do j=1,m
+                        do i=1,m
+                                Fish(i,j)=Fish(i,j)+dLs(i)*dLs(j)/(ddL**2+(dz*dLs(6))**2)
                         enddo
                 enddo
-        endif
+        !endif
                 enddo
+                iFish=inverse(Fish,m)
+                !fis=dob(dob(dob(Fish,5,5),4,4),3,3)
+                !ifis=inverse(fis,2)
+                !print "(2F7.2,2F14.9,A8,F14.9)",B,C,sqrt(iFis(1,1)),sqrt(iFis(2,2)),'FoM=',1/sqrt(Det(ifis,2))
+                print "(2F7.2,2F14.9,A8,F14.9)",B,C,sqrt(iFish(1,1)),sqrt(iFish(2,2)),'FoM=',1/sqrt(Det(ifish,2))
+
+                enddo
+
         
-        print*,l
-                Fisher=210000*Fisher/n
-        !print*,'*************',test(1)/test(2)
+                !Fish=210000*Fish/n
                 close(30)
-        end function Fisher
+        end subroutine Fisher
 
 end module F_GW
 
