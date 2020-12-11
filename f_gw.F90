@@ -151,16 +151,15 @@ contains
                 enddo
         !endif
                 enddo
+                Fish=210000*Fish/n
                 iFish=inverse(Fish,m)
-                !fis=dob(dob(dob(Fish,5,5),4,4),3,3)
-                !ifis=inverse(fis,2)
-                !print "(2F7.2,2F14.9,A8,F14.9)",B,C,sqrt(iFis(1,1)),sqrt(iFis(2,2)),'FoM=',1/sqrt(Det(ifis,2))
-                print "(2F7.2,2F14.9,A8,F14.9)",B,C,sqrt(iFish(1,1)),sqrt(iFish(2,2)),'FoM=',1/sqrt(Det(ifish,2))
+                fis=dob(dob(dob(Fish,5,5),4,4),3,3)
+                ifis=inverse(fis,2)
+                print*,''
+                print "(2F7.2,2F14.9,A8,F14.9)",B,C,sqrt(iFis(1,1)),sqrt(iFis(2,2)),'FoM=',1/sqrt(Det(ifis,2))
+                print "(5F14.9)",sqrt(iFish(1,1)),sqrt(iFish(2,2)),sqrt(iFish(3,3)),sqrt(iFish(4,4)),sqrt(iFish(5,5))
 
                 enddo
-
-        
-                !Fish=210000*Fish/n
                 close(30)
         end subroutine Fisher
 

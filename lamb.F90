@@ -235,8 +235,7 @@ contains
                         do i=j,dimen
                                 lambda(i,j)=0.
                                 do k=1,3
-                                        !lambda(i,j)=lambda(i,j)+lamb_simp(S,ef_lower,ef_upper,df,i,j,k)
-                                        lambda(i,j)=lambda(i,j)+lamb_norm(S,ef_lower,ef_upper,df,i,j,k)
+                                        lambda(i,j)=lambda(i,j)+lamb_simp(S,ef_lower,ef_upper,df,i,j,k)
                                 enddo
                         end do
                 end do
@@ -271,7 +270,7 @@ contains
                 enddo
                 open(unit=11,file='dd_L.txt')
 
-                do i=1,20
+                do i=1,n
                         read(10,*) x,S.z,S.d_L,S.alpha,S.delta,S.varphi,iota
                         !print*,S
                         !print*,iota
@@ -283,14 +282,13 @@ contains
                         S.M_c=(1+S.z)*M_c
 
                         lamda=lambda(S)
-                        ilamb=inverse(lamda,6)
-                        !ilamb=inverse(lamda,dimen)
+                        ilamb=inverse(lamda,dimen)
                         !print '(6E25.15)',lamda
                         !print *,' '
                         !print '(6E25.15)',matmul(lamda,ilamb)
-                        A(i)=ilamb(6,6)!+0.0025*S.z**2
-                        print'(F6.4,F21.15)',S.z,sqrt(A(i))
-                        !write(11,'(F6.4,E25.15)')S.z,A(i)
+                        A(i)=ilamb(6,6)+0.0025*S.z**2
+                        !print'(F6.4,F21.15)',S.z,sqrt(A(i))
+                        write(11,'(F6.4,E25.15)')S.z,A(i)
                 enddo
                 close(11)
                 close(10)
