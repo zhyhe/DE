@@ -129,38 +129,43 @@ contains
                 real(8) :: Fish(m,m),iFish(m,m)
                 real(8) :: fis(2,2),ifis(2,2)
                 real(8) :: dLs(6)
-                real(8) :: B,C
-                real(8) :: a,z,dL,dz,ddL
-                integer :: i,j,k,l,n=10000
-                Fish=0
-                open(unit=30,file='/home/zhyhe/workspace/DE.data/New_SNRall_ET2CE10000.dat')
-                read(30,*)
-                do l=1,19
+                real(8) :: z,e,SNR
+                integer :: i,j,k,ioS,n=10000
 
-                read(30,*) B,C
+                open(unit=30,file='/home/zhyhe/workspace/DE.data/dd_L.txt')
+                k=0
                 Fish=0
-
-                do k=1,n
-                read(30,*) a,z,dL,ddL,dz
-        !if (a>10) then
+                do
+                read(30,*,ioStat=ioS) z,e,SNR
+                !print *,z,e
+                if(ioS/=0) exit
+                k=k+1
+                if(mod(k,1000)==0) print*,k
+            if(SNR>10)then  !信噪比>10
                 dLs=dd_L(z,P)
                 do j=1,m
                         do i=1,m
-                                Fish(i,j)=Fish(i,j)+dLs(i)*dLs(j)/(ddL**2+(dz*dLs(6))**2)
+                                Fish(i,j)=Fish(i,j)+dLs(i)*dLs(j)/e
                         enddo
                 enddo
-        !endif
+            endif
                 enddo
-                Fish=210000*Fish/n
+                close(30)
+                Fish=7200000*Fish/k
+
+                open(unit=25,file='/home/zhyhe/workspace/DE.data/Fis.txt')
+                do i=1,5
+                write(25,'(5E25.15)'),Fish(:,i)
+                enddo
+                close(25)
+
                 iFish=inverse(Fish,m)
                 fis=dob(dob(dob(Fish,5,5),4,4),3,3)
                 ifis=inverse(fis,2)
                 print*,''
-                print "(2F7.2,2F14.9,A8,F14.9)",B,C,sqrt(iFis(1,1)),sqrt(iFis(2,2)),'FoM=',1/sqrt(Det(ifis,2))
+                print "(2F14.9,A8,F17.9)",sqrt(iFis(1,1)),sqrt(iFis(2,2)),'FoM=',1/sqrt(Det(ifis,2))
                 print "(5F14.9)",sqrt(iFish(1,1)),sqrt(iFish(2,2)),sqrt(iFish(3,3)),sqrt(iFish(4,4)),sqrt(iFish(5,5))
 
-                enddo
-                close(30)
         end subroutine Fisher
 
 end module F_GW

@@ -18,8 +18,9 @@ Program DE
         !print*,'ddddddddddL',dL(z),d_L(z,P0)
         !print*,h0,P0.h0
 
-        !call Fisher_S()
+        call Fisher_S()
         call Fisher(P0)
+        call Fisher_CMB()
         !Fis_U=Fisher(P0)
         !iFis=inverse(Fis_U,5)
         !print *,' '

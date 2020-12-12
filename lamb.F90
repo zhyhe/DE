@@ -90,53 +90,58 @@ contains
         END FUNCTION H_
 
         !*******************     计算H(f)的偏导     *******************!
-         COMPLEX(8) FUNCTION D_H(f,S,Det,j)
-                integer,intent(in):: Det,j !j代表对第几个参数进行求导
-                real(8),intent(in):: f
-                real(8)           :: h
-                type(source),intent(in) :: S
-                type(source)            :: S1,S2
-                integer :: i
+        FUNCTION D_H(f,S,Det)
+                integer,intent(in)  ::  Det
+                real(8),intent(in)  ::  f
+                type(source),intent(in):: S
+                type(source) S1,S2
+                complex(8):: D_H(6)
+                integer      i
+                real(8)      h
                 S1=S
                 S2=S
-                select case(j)
-                case(1)
-                        h=1D-8
-                        S1.M_c=S.M_c-h !M_c=1.4
-                        S2.M_c=S.M_c+h
-                        D_H=(H_(f,S2,Det)-H_(f,S1,Det))*S.M_c/(2*h)
-                case(2)
-                        h=1D-5
-                        S1.eta=S.eta-h !eta=0.25
-                        S2.eta=S.eta+h
-                        D_H=(H_(f,S2,Det)-H_(f,S1,Det))*S.eta/(2*h)
-                case(3)
-                        !h=1D-8
-                        !S1.t_c=S.t_c-h !t_c=0
-                        !S2.t_c=S.t_c+h
-                        !D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
-                        D_H=2*PI*f*cj*H_(f,S,Det)
-                case(4)
-                        !h=1D-15
-                        !S1.psi_c=S.psi_c-h !psi_c=0
-                        !S2.psi_c=S.psi_c+h
-                        !D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
-                        D_H=-2*cj*H_(f,S,Det)
-                case(5)
-                        h=1D-3
-                        S1.varphi=S.varphi-h 
-                        S2.varphi=S.varphi+h
-                        D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
-                case(6)
-                        !h=1D-4
-                        !S1.d_L=S.d_L-h !d_L*=1000
-                        !S2.d_L=S.d_L+h
-                        !D_H=(H_(f,S2,Det)-H_(f,S1,Det))*S.d_L/(2*h)
-                        D_H=-H_(f,S,Det)
-                case default
-                        print *,'求导的参数有误，请检查程序'
-                        stop
-                end select
+                h=1D-8
+                S1.M_c=S.M_c-h !M_c=1.4
+                S2.M_c=S.M_c+h
+                D_H(1)=(H_(f,S2,Det)-H_(f,S1,Det))*S.M_c/(2*h)
+
+                S1=S
+                S2=S
+                h=1D-5
+                S1.eta=S.eta-h !eta=0.25
+                S2.eta=S.eta+h
+                D_H(2)=(H_(f,S2,Det)-H_(f,S1,Det))*S.eta/(2*h)
+
+                !S1=S
+                !S2=S
+                !h=1D-8
+                !S1.t_c=S.t_c-h !t_c=0
+                !S2.t_c=S.t_c+h
+                !D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
+                D_H(3)=2*PI*f*cj*H_(f,S,Det)
+
+                !S1=S
+                !S2=S
+                !h=1D-15
+                !S1.psi_c=S.psi_c-h !psi_c=0
+                !S2.psi_c=S.psi_c+h
+                !D_H=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
+                D_H(4)=-2*cj*H_(f,S,Det)
+                
+                S1=S
+                S2=S
+                h=1D-3
+                S1.varphi=S.varphi-h
+                S2.varphi=S.varphi+h
+                D_H(5)=(H_(f,S2,Det)-H_(f,S1,Det))/(2*h)
+
+                !S1=S
+                !S2=S
+                !h=1D-4
+                !S1.d_L=S.d_L-h !d_L*=1000
+                !S2.d_L=S.d_L+h
+                !D_H=(H_(f,S2,Det)-H_(f,S1,Det))*S.d_L/(2*h)
+                D_H(6)=-H_(f,S,Det)
         END FUNCTION D_H
 
         !***************        Fisher Matrix of a Source        ***************!
@@ -167,83 +172,56 @@ contains
                 close(15)
         end Function S_h1
 
-
-
-        real(8) function lamb_simp(S,low,up,width,i,j,Det) !为下面的lambda函数作准备
-                implicit none
-                real(8),intent(in)    :: low,up,width
-                type(source),intent(in) :: S
-                integer,intent(in)    :: i,j,Det !分别是i,j导数及Det
-                integer               :: l,n
-                real(8)               :: width_,x
-                real(8)               :: a,b
-                if(up-low<width)then
-                        lamb_simp=0.
-                else
-                        n=(up-low)/width
-                        if(mod(n,2)==0) n=n+1
-                        width_=(up-low)/(n-1)
-                        a=exp(low)
-                        b=exp(up)
-                        lamb_simp=4*a*(real(D_H(a,S,Det,i))*real(D_H(a,S,Det,j))+aimag(D_H(a,S,Det,i))*aimag(D_H(a,S,Det,j)))/S_h(a)+\
-                        4*b*(real(D_H(b,S,Det,i))*real(D_H(b,S,Det,j))+aimag(D_H(b,S,Det,i))*aimag(D_H(b,S,Det,j)))/S_h(b)
-                        do l=2,n-1
-                        x=exp(a+(l-1)*width_)
-                        if(mod(l,2)==0)then
-                                lamb_simp=lamb_simp+16*x*(real(D_H(x,S,Det,i))*real(D_H(x,S,Det,j))+aimag(D_H(x,S,Det,i))*aimag(D_H(x,S,Det,j)))/S_h(x)
-                        else
-                                lamb_simp=lamb_simp+8*x*(real(D_H(x,S,Det,i))*real(D_H(x,S,Det,j))+aimag(D_H(x,S,Det,i))*aimag(D_H(x,S,Det,j)))/S_h(x)
-                        end if
-                        enddo
-                        lamb_simp=lamb_simp*width_/3
-                endif
-        end function lamb_simp
-
-        real(8) function lamb_norm(S,low,up,width,i,j,Det) !为下面的lambda函数作准备
-                implicit none
-                real(8),intent(in)    :: low,up,width
-                type(source),intent(in) :: S
-                integer,intent(in)    :: i,j,Det !分别是i,j导数及Det
-                integer               :: l,n
-                real(8)               :: x
-                real(8)               :: a
-                if(up-low<width)then
-                        lamb_norm=0.
-                else
-                        a=exp(low)
-                        n=(up-low)/width
-                        lamb_norm=0.
-                        do l=1,n
-                        x=exp(a+l*width)
-                                lamb_norm=lamb_norm+4*x*width*(real(D_H(x,S,Det,i))*real(D_H(x,S,Det,j))+aimag(D_H(x,S,Det,i))*aimag(D_H(x,S,Det,j)))/S_h(x)
-                        enddo
-                endif
-        end function lamb_norm
-
         function lambda(S)  !返回Fisher Matrix Lambda
                 implicit none
                 type(source),intent(in):: S      !自变量是个源
                 real(8)      :: lambda(dimen,dimen)      !这个函数的返回值是个数组
-                integer      :: i,j,k
-                real(8),parameter:: df=5D-1,ef_lower=0.
+                integer      :: i,j,Det,l
+                integer,parameter:: n=41        !积分次数,只能取奇数
+                real(8)          :: def,ef_lower=0.
                 real(8)          :: f_upper,ef_upper,M
+                real(8)          :: lamb_simp(6,6,3)!3表示3个探测器
+                complex(8)       :: dH(6,n) !6表示fisher matrix的参数数目，n表示积分步数
+                real(8)          :: Sh(n),x(n)     !Sh(n)表示每一步的噪声
                 M=S.M_c/S.eta**(3._8/5)
                 f_upper=F0/M
                 ef_upper=log(f_upper)
 
-                do j=1,dimen
-                        do i=j,dimen
-                                lambda(i,j)=0.
-                                do k=1,3
-                                        lambda(i,j)=lambda(i,j)+lamb_simp(S,ef_lower,ef_upper,df,i,j,k)
-                                enddo
-                        end do
-                end do
-                do j=1,dimen
-                        do i=1,j-1
-                                lambda(i,j)=lambda(j,i)
+                def=(ef_upper-ef_lower)/(n-1) !这里是计算步长
+                lambda=0.
+
+                if(ef_upper-ef_lower<def)then !这里写得看起来很复杂，是为了算得更快
+                        lambda=0.             !先循环f，再循环Det,i,j
+                else                          !所以用dH来保存D_H(f,S,Det)
+                        do Det=1,3            !lamb_simp(i,j,Det)保存三个探测器分别的fisher matrix
+                        do i=1,n
+                        x(i)=exp(ef_lower+(i-1)*def)
+                        Sh(i)=S_h(x(i))
+                        dH(:,i)=D_H(x(i),S,Det)
                         enddo
-                enddo
+                        do j=1,dimen
+                        do i=j,dimen
+                        lamb_simp(i,j,Det)=4*x(1)*(real(dH(i,1))*real(dH(j,1))+aimag(dH(i,1))*aimag(dH(j,1)))/Sh(1)+\
+                        4*x(n)*(real(dH(i,n))*real(dH(j,n))+aimag(dH(i,n))*aimag(dH(j,n)))/Sh(n)
+                        do l=2,n-1
+                        if(mod(l,2)==0)then
+                                lamb_simp(i,j,Det)=lamb_simp(i,j,Det)+16*x(l)*(real(dH(i,l))*real(dH(j,l))+aimag(dH(i,l))*aimag(dH(j,l)))/Sh(l)
+                        else
+                                lamb_simp(i,j,Det)=lamb_simp(i,j,Det)+8*x(l)*(real(dH(i,l))*real(dH(j,l))+aimag(dH(i,l))*aimag(dH(j,l)))/Sh(l)
+                        end if
+                        enddo
+                        lamb_simp(i,j,Det)=lamb_simp(i,j,Det)*def/3
+                        enddo
+                        enddo
+                        lambda=lambda+lamb_simp(:,:,Det)
+                        enddo
+                        
+                        do j=1,dimen
+                        do i=1,j-1
+                        lambda(i,j)=lambda(j,i)
+                        enddo
+                        enddo
+                endif
         end function lambda
 
         !**********************************************************************************************!
@@ -251,13 +229,11 @@ contains
                 implicit none
                 type(source) :: S
                 integer      :: i,j,k,l
-                integer,parameter :: n=1000
+                integer,parameter :: n=10000
                 real(8) :: A(n)
                 real(8),parameter :: m1=1.35_8,m2=1.35_8
                 real(8)          :: lamda(dimen,dimen),M,M_c,ilamb(dimen,dimen)
-                real(8) :: x,iota
-
-
+                real(8) :: SNR,iota
                 M=m1+m2
                 S.eta=0.25_8
                 M_c=M*S.eta**6D-1
@@ -268,10 +244,9 @@ contains
                 do i=1,2
                 read (10,*)
                 enddo
-                open(unit=11,file='dd_L.txt')
-
-                do i=1,n
-                        read(10,*) x,S.z,S.d_L,S.alpha,S.delta,S.varphi,iota
+                open(unit=11,file='~/workspace/DE.data/dd_L.txt')
+                do i=1,10000
+                        read(10,*) SNR,S.z,S.d_L,S.alpha,S.delta,S.varphi,iota
                         !print*,S
                         !print*,iota
                         S.alpha=deg2nat*S.alpha
@@ -288,56 +263,49 @@ contains
                         !print '(6E25.15)',matmul(lamda,ilamb)
                         A(i)=ilamb(6,6)+0.0025*S.z**2
                         !print'(F6.4,F21.15)',S.z,sqrt(A(i))
-                        write(11,'(F6.4,E25.15)')S.z,A(i)
+                        write(11,'(F6.4,E25.15,F13.4)')S.z,A(i),rho(S)
+                        !write(*,'(F6.4,2F25.15)')S.z,rho(S),Sqrt(A(i))
+                        if(mod(i,1000)==0) print*,i
                 enddo
                 close(11)
                 close(10)
         end subroutine Fisher_S
 
         !*******************        Combined SNR        *******************!
-        real(8) function rho_simp(S,a,b,width,Det) !为下面的rho函数作准备
+        real(8) function rho(S)  !返回Fisher Matrix Lambda
                 implicit none
-                real(8),intent(in)    :: a,b,width
-                type(source),intent(in) :: S
-                integer,intent(in)    :: Det
-                integer               :: l,n
-                real(8)               :: width_,x
-                if(b-a<width)then
-                        rho_simp=0.
-                else
-                        n=(b-a)/width
-                        if(mod(n,2)==0) n=n+1
-                        width_=(b-a)/(n-1)
-                        rho_simp=4*ABS(H_(a,S,Det))**2/S_h(a)+4*ABS(H_(b,S,Det))**2/S_h(b)
-                        do l=2,n-1
-                        x=a+(l-1)*width_
-                        if(mod(l,2)==0)then
-                                rho_simp=rho_simp+16*ABS(H_(x,S,Det))**2/S_h(x)
-                        else
-                                rho_simp=rho_simp+8*ABS(H_(x,S,Det))**2/S_h(x)
-                        end if
-                        enddo
-                        rho_simp=rho_simp*width_/3
-                endif
-        end function rho_simp
-        real(8) function rho(S)
-                implicit none
-                integer :: i
-                type(source),intent(in) :: S
-                real(8),parameter       :: df=1D-1,f_lower=1.
-                real(8)                 :: f_upper,M
+                type(source),intent(in):: S      !自变量是个源
+                integer      :: i,Det,l
+                integer,parameter:: n=41        !积分次数,只能取奇数
+                real(8)          :: def,ef_lower=0.
+                real(8)          :: f_upper,ef_upper,M
+                real(8)          :: a,b,x,rho_simp
                 M=S.M_c/S.eta**(3._8/5)
                 f_upper=F0/M
+                ef_upper=log(f_upper)
+                def=(ef_upper-ef_lower)/(n-1) !这里是计算步长
+                a=exp(ef_lower)
+                b=f_upper
                 rho=0.
-                do i=1,3
-                rho=rho+rho_simp(S,f_lower,f_upper,df,i)
-                enddo
+
+                if(ef_upper-ef_lower<def)then
+                        rho=0.
+                else
+                        do Det=1,3
+                        rho_simp=4*a*ABS(H_(a,S,Det))**2/S_h(a)+4*b*ABS(H_(b,S,Det))**2/S_h(b)
+                        do l=2,n-1
+                        x=exp(ef_lower+(l-1)*def)
+                        if(mod(l,2)==0)then
+                                rho_simp=rho_simp+16*x*ABS(H_(x,S,Det))**2/S_h(x)
+                        else
+                                rho_simp=rho_simp+8*x*ABS(H_(x,S,Det))**2/S_h(x)
+                        end if
+                        enddo
+                        rho_simp=rho_simp*def/3
+                        rho=rho+rho_simp
+                        enddo
+                endif
                 rho=sqrt(rho)
         end function rho
         !*******************        Combined SNR        *******************!
-        
-
-
-
-
 end module Lamb
